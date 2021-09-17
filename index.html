@@ -14,8 +14,12 @@
   </canvas>
     <script src="assets/javascripts/invaders.js"></script>
     <script>
-        var spaceInvaders = new SpaceInvaders.Game();
-        spaceInvaders.start();
+        
+        document.addEventListener('dragover', event => event.preventDefault());
+        document.addEventListener('drop', event => event.preventDefault());
+        
+       (new SpaceInvaders.Game()).start();
+
     </script>
 </body>
 

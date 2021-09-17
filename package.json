@@ -26,18 +26,15 @@
     "url": "git+https://github.com/thesourorange/electron-invaders.git"
   },
   "keywords": [
-    "Electron",
-    "two.js",
-    "demo"
+    "Electron"
   ],
   "author": "GitHub",
   "license": "CC0-1.0",
-  "dependencies": {
-    "electron-disable-file-drop": "^1.0.2"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "electron": "^8.2.5",
-    "electron-builder": "^22.6.0"
+    "electron": "^14.0.1",
+    "electron-builder": "^22.6.0",
+    "node": "^16.9.1"
   },
   "bugs": {
     "url": "https://github.com/thesourorange/electron-invaders/issues"

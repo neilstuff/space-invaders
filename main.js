@@ -12,7 +12,7 @@ var mainWindow = null;
 
 function createWindow() {
 
-    mainWindow = new BrowserWindow({ width: 740, height: 820, resizable: false, autoHideMenuBar: true });
+    mainWindow = new BrowserWindow({ width: (config.mode == "debug" ? 1600 : 740), height: 820, resizable: false, autoHideMenuBar: true });
 
     if (config.mode == "debug") {
         mainWindow.webContents.openDevTools();

@@ -5,6 +5,8 @@
   "main": "main.js",
   "scripts": {
     "pack": "electron-builder --dir",
+    "compile": "webpack --config webpack.config.js",
+ 
     "dist": "electron-builder --publish never",
     "start": "electron ."
   },
@@ -32,9 +34,11 @@
   "license": "CC0-1.0",
   "dependencies": {},
   "devDependencies": {
-    "electron": "^14.0.1",
-    "electron-builder": "^22.6.0",
-    "node": "^16.9.1"
+    "electron": "^14.0.1",  
+    "electron-builder": "^22.11.7",
+    "node": "^16.0.0",
+    "webpack": "^1.13.3",
+    "webpack-dev-server": "^1.16.2"
   },
   "bugs": {
     "url": "https://github.com/thesourorange/electron-invaders/issues"

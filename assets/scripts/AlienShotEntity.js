@@ -54,6 +54,7 @@ class AlienShotEntity extends AnimatedMovableSpriteEntity {
         this.setEnabled(true);
         this.setDirectionY(1);
         this.progressTicks = 1;
+
     }
 
     explode() {

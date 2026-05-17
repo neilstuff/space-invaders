@@ -7,6 +7,7 @@ var CollideableEntity = require('./CollideableEntity.js');
 var AnimatedMovableSpriteEntity = require('./AnimatedMovableSpriteEntity.js');
 var AlienShotEntity = require('./AlienShotEntity.js');
 var Shield = require('./Shield.js');
+var Sound = require('./Sound.js');
 var Game = require('./Game.js');
 
 class Controller extends Constants {
@@ -27,6 +28,15 @@ class Controller extends Constants {
     static get FLYING_SAUCER_INTERVAL() { return 1200; }
     /** A time that is waited after player avatar gets destroyed. */
     static get RELAUNCH_WAIT_TIME() { return 150; }
+
+    /** A time that is waited after player avatar gets destroyed. */
+    static get ALIEN_FRAME_DECREMENT() { return 4; }
+
+   /** A constant sound rate decrement for the aliens. */
+    static get ALIEN_SOUND_RATE_DECREMENT() { return 0.1; }
+
+   /** The inital sound rate */
+    static get ALIEN_SOUND_INITIAL_STATE() { return 72; }
 
     /** *************************************************************************
      * The ingame state for the Space Invaders game.
@@ -74,13 +84,21 @@ class Controller extends Constants {
         /** The current shot column index of the plunger shot.  */
         this.alienPlungerShotColumnIndice = Controller.ALIEN_PLUNGER_SHOT_START_INDEX;
 
-        console.log(`Initialized alien plunger shot column index: ${this.alienPlungerShotColumnIndice}`);
         /** The current shot column index of the squiggly shot. */
         this.alienSquigglyShotColumnIndice = Controller.ALIEN_SQUIGGLY_SHOT_START_INDEX;
         /** The column indices used to define where to shoot the alien missiles. */
         this.alienShotColumn = [
             0, 6, 0, 0, 0, 3, 10, 0, 5, 2, 0, 0, 10, 8, 1, 7, 1, 10, 3, 6, 9
         ];
+
+        this.alienSounds = [
+            "fastinvader1", "fastinvader2", "fastinvader3", "fastinvader4"
+        ];
+
+        this.soundIndex = 0;
+        this.soundRateCounter = 72;
+        this.soundRateDecrement = 1;
+
         /** A lock used to prevent rolling shot to be created constantly. */
         this.alienRollingShotLock = 0;
 
@@ -283,6 +301,9 @@ class Controller extends Constants {
         // construct the four avatar shields for the player.
         this.constructShields();
 
+        // Initialize the sound manager for the game.
+        this.sound = new Sound();
+
     }
 
     getAlienReloadRate() {
@@ -446,7 +467,6 @@ class Controller extends Constants {
     }
 
     update(dt) {
-        console.log(`Controller alienPlungerShotColumnIndice: ${this.alienPlungerShotColumnIndice} : ${this.alienSquigglyShotColumnIndice}`);
         // skip logical updates if the game has ended.
         if (this.gameOverText.isVisible()) {
             return;
@@ -544,7 +564,9 @@ class Controller extends Constants {
                 if (aliensHitBounds && this.aliens[i].getStepCounter()) {
                     this.aliens[i].setDirectionX(-this.aliens[i].getDirectionX());
                     this.aliens[i].setY(this.aliens[i].getY() + this.aliens[i].getHeight());
+                  
                 }
+                
                 if (this.aliens[i].isVisible()) {
                     activeAlienCount++;
                     this.aliens[i].update(dt);
@@ -552,6 +574,7 @@ class Controller extends Constants {
 
                     // check whether the alien has just landed.
                     if (this.aliens[i].collides(this.footerLine)) {
+                        sound.play("explosion");
                         this.avatar.explode();
                     }
                 }
@@ -584,7 +607,7 @@ class Controller extends Constants {
             if (this.alienRollingShotLock > 0) {
                 this.alienRollingShotLock--;
             }
-            
+
             if (this.alienShots[0].isReadyToBeFired() && this.alienRollingShotLock <= 0) {
                 // find the nearest alien from the list of aliens.
                 var avatarX = this.avatar.getCenterX();
@@ -598,7 +621,6 @@ class Controller extends Constants {
                     for (var row = 4; row >= 0; row--) {
                         var idx = (row * 11) + col;
 
-                        console.log(`Checking alien at idx ${idx} with distance ${distance} and prevDistance ${prevDistance} and ${this.aliens == null ? 'aliens is null' : 'aliens is not null'} for rolling shot`);
                         if (this.aliens[idx].isVisible()) {
                             alienIdx = idx;
                             prevDistance = distance;
@@ -612,28 +634,26 @@ class Controller extends Constants {
                     this.alienShots[0].setY(this.aliens[alienIdx].getY() + this.aliens[alienIdx].getHeight());
                     this.alienShots[0].fire();
                 }
+
                 this.alienRollingShotLock = this.getAlienReloadRate() * 4;
             }
+            
         }
 
         // ========================================================================
         // create an alien plunger missile if it is being ready.
         if (activeAlienCount > 1) {
 
-            console.log(`Alien length ${this.aliens.length} and alien shots length ${this.alienShots.length}`);
             if (this.avatar.isEnabled() && this.alienShots[1].isReadyToBeFired()) {
                 // get the next target column and increment the column index pointer.
-               
-                console.log(`Plunger shot is ready to be fired. Current plunger shot column index: ${this.alienPlungerShotColumnIndice} ${this.aliens == null ? 'aliens is null' : 'aliens is not null'}`);
-
-                console.log(JSON.stringify(this.alienShotColumn));
                 var column = this.alienShotColumn[this.alienPlungerShotColumnIndice];
+
                 this.alienPlungerShotColumnIndice = (this.alienPlungerShotColumnIndice + 1);
                 this.alienPlungerShotColumnIndice = (this.alienPlungerShotColumnIndice % Controller.ALIEN_SHOT_INDICE_COUNT);
 
                 for (var n = 4; n >= 0; n--) {
                     var idx = (n * 11) + column;
-                    console.log(`Firing plunger shot from alien ${this.avatar.isEnabled() ? 'enabled' : 'disabled'} ${this.alienShots[1].isReadyToBeFired() ? 'is ready' : 'is not ready'} at idx ${idx} at column ${column}`);
+
                     if (this.aliens[idx].isVisible()) {
                         // assign the position of the plunger shot based on the nearest alien.
                         this.alienShots[1].setX(this.aliens[idx].getCenterX() - this.alienShots[1].getExtentX());
@@ -669,6 +689,7 @@ class Controller extends Constants {
                 this.flyingSaucer.setVisible(true);
                 this.flyingSaucer.setAnimationFrameIndex(0);
                 this.flyingSaucerCounter = Controller.FLYING_SAUCER_INTERVAL;
+                this.sound.play("ufo_lowpitch")
             } else {
                 // get the next target column and increment the column index pointer.
                 var column = this.alienShotColumn[this.alienSquigglyShotColumnIndice];
@@ -677,7 +698,6 @@ class Controller extends Constants {
 
                 for (var n = 4; n >= 0; n--) {
                     var idx = (n * 11) + column;
-                    console.log(`Checking alien at idx ${idx} for squiggly shot at column ${column}`);
                     if (this.aliens[idx].isVisible()) {
                         // assign the position of the plunger shot based on the nearest alien.
                         this.alienShots[2].setX(this.aliens[idx].getCenterX() - this.alienShots[2].getExtentX());
@@ -697,6 +717,7 @@ class Controller extends Constants {
                 this.alienShots[i].setEnabled(false);
                 this.alienShots[i].setVisible(false);
                 this.avatar.explode();
+                this.sound.play("explosion");
             } else if (this.alienShots[i].collides(this.footerLine)) {
                 // explode at the footer.
                 this.alienShots[i].explode();
@@ -741,6 +762,8 @@ class Controller extends Constants {
                 for (var i = 0; i < this.shields.length; i++) {
                     this.shields[i].preciseCollides(this.avatarLaser);
                 }
+
+                var decrementSound = false;
                 for (n = 0; n < this.aliens.length; n++) {
                     if (this.avatarLaser.collides(this.aliens[n])) {
                         // disable and stop the laser from further movement.
@@ -771,12 +794,19 @@ class Controller extends Constants {
 
                         // speed up the movement of the aliens.
                         var newStepSize = this.aliens[0].getStepSize() - Controller.ALIEN_STEP_DECREMENT_SIZE;
+                        if (decrementSound == false) {
+                            this.soundRateDecrement += Controller.ALIEN_SOUND_RATE_DECREMENT;
+                            decrementSound = true;
+                            console.log(`Alien Sound Rate Decrement: ${this.soundRateDecrement}`);
+                        }
 
                         for (var m = 0; m < this.aliens.length; m++) {
                             this.aliens[m].setStepSize(newStepSize);
                             this.aliens[m].setAnimationStepSize(newStepSize);
                         }
+
                         break;
+                        
                     }
                 }
             }
@@ -796,6 +826,16 @@ class Controller extends Constants {
                 }
             }
         }
+
+        if (this.soundRateCounter <= 0) {
+            this.sound.play(this.alienSounds[this.soundIndex]);
+            this.soundIndex = (this.soundIndex + 1) % this.alienSounds.length;
+            this.soundRateCounter = Controller.ALIEN_SOUND_INITIAL_STATE;
+        } else {
+            this.soundRateCounter -= this.soundRateDecrement;        
+        }
+        
+        console.log(`Sound Rate Counter: ${this.soundRateCounter} : Sound Rate Decrement: ${this.soundRateDecrement}`);
 
     }
 
@@ -865,12 +905,12 @@ class Controller extends Constants {
                 }
                 break;
             case Constants.KEY_RIGHT:
-               if (this.avatar.isEnabled() && this.avatar.getDirectionX() == 1) {
+                if (this.avatar.isEnabled() && this.avatar.getDirectionX() == 1) {
                     this.avatar.setDirectionX(0);
                 }
                 break;
             case Constants.KEY_SPACEBAR:
-               if (this.avatar.isEnabled() && this.avatarLaser.isVisible() == false) {
+                if (this.avatar.isEnabled() && this.avatarLaser.isVisible() == false) {
                     // shoot the laser from the avatar position.
                     this.avatarLaser.setVisible(true);
                     this.avatarLaser.setEnabled(true);
@@ -881,6 +921,7 @@ class Controller extends Constants {
 
                     // increment the laser counter.
                     this.avatarLaserCount++;
+                    this.sound.play("shoot");
                 }
                 break;
             case Constants.KEY_ENTER:

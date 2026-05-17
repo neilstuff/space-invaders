@@ -3,14 +3,16 @@ class Sound {
     constructor() {
 
         this.sounds = {};
-        this.sounds['newBeat'] = new Audio('assets/sounds/newBeat.wav');
-        this.sounds['fire1'] = new Audio('assets/sounds/fire1.wav');
-        this.sounds['spider'] = new Audio('assets/sounds/spider.wav');
-        this.sounds['newBeat'] = new Audio('assets/sounds/newBeat.wav');
-        this.sounds['flea'] = new Audio('assets/sounds/flea.wav');
-        this.sounds['death'] = new Audio('assets/sounds/death.wav');
-        this.sounds['1up'] = new Audio('assets/sounds/1up.wav');
-        this.sounds['kill'] = new Audio('assets/sounds/kill.wav');
+        this.sounds['explosion'] = new Audio('assets/sounds/explosion.wav');
+        this.sounds['fastinvader1'] = new Audio('assets/sounds/fastinvader1.wav');
+        this.sounds['fastinvader2'] = new Audio('assets/sounds/fastinvader2.wav');
+        this.sounds['fastinvader3'] = new Audio('assets/sounds/fastinvader3.wav');
+        this.sounds['fastinvader4'] = new Audio('assets/sounds/fastinvader4.wav');
+        this.sounds['invaderkilled'] = new Audio('assets/sounds/invaderkilled.wav');
+        this.sounds['shoot'] = new Audio('assets/sounds/shoot.wav');
+        this.sounds['ufo_highpitch'] = new Audio('assets/sounds/ufo_highpitch.wav');
+        this.sounds['ufo_lowpitch'] = new Audio('assets/sounds/ufo_lowpitch.wav');
+
         this.playing = false;
 
     }
@@ -42,6 +44,10 @@ class Sound {
             this.playing = false;
         }
 
+    }
+
+    get SOUNDS() {
+        return this.sounds;
     }
 
 }

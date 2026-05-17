@@ -209,6 +209,7 @@ class WelcomeState extends Constants {
                 this.game.setPlayerCount(1);
                 this.game.setActivePlayer(1);
                 break;
+                
             case Constants.KEY_2:
                 this.game.setPlayerCount(2);
                 this.game.setActivePlayer(1);

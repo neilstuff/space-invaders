@@ -33,7 +33,7 @@ class Controller extends Constants {
     static get ALIEN_FRAME_DECREMENT() { return 4; }
 
    /** A constant sound rate decrement for the aliens. */
-    static get ALIEN_SOUND_RATE_DECREMENT() { return 0.1; }
+    static get ALIEN_SOUND_RATE_DECREMENT() { return 0.05; }
 
    /** The inital sound rate */
     static get ALIEN_SOUND_INITIAL_STATE() { return 72; }
@@ -779,6 +779,10 @@ class Controller extends Constants {
                         // hide and disable the collided alien.
                         this.aliens[n].setEnabled(false);
                         this.aliens[n].setVisible(false);
+                        
+                        // play the sound for alien killed.
+                        this.sound.play("invaderkilled");
+
                         // earn score to player based on the alien type.
                         var score = 0;
                         if (n < 11) {

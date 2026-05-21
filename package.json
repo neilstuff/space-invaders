@@ -6,7 +6,6 @@
   "scripts": {
     "pack": "electron-builder --dir",
     "compile": "webpack --config webpack.config.js",
- 
     "dist": "electron-builder --publish never",
     "start": "electron ."
   },
@@ -37,8 +36,11 @@
     "electron": "42.1.0",
     "electron-builder": "22.14.13",
     "node": "22.22.3",
-    "webpack": "^1.13.3",
-    "webpack-dev-server": "^1.16.2"
+    "webpack":  "5.88.2",
+    "webpack-dev-server": "4.15.1",
+    "webpack-cli": "5.1.4",
+    "style-loader": "4.0.0",
+    "css-loader": "7.1.4"
   },
   "bugs": {
     "url": "https://github.com/thesourorange/electron-invaders/issues"

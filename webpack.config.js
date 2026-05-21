@@ -1,17 +1,29 @@
 const path = require('path');
 
 module.exports = {
+  mode: 'production',
   entry: {
     main: "./assets/scripts/index.js",
   },
   output: {
     path: __dirname,
+    hashFunction: 'sha256',
     filename: "[name].bundle.js"
   },
   resolve: {
-    resolveLoader: {
-      root: path.join(__dirname, 'node_modules')
-    },
-    extensions: ['', '.js', '.json', '.css']
+    modules: [
+      'node_modules',
+      path.resolve(__dirname, 'node_modules')
+    ],
+    extensions: ['.js', '.json']
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css$/i,
+        // css-loader runs first, then style-loader
+        use: ["style-loader", "css-loader"],
+      },
+    ],
   }
 };
